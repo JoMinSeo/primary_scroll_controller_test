@@ -7,25 +7,36 @@ class MessagePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.red,
-        onPressed: () {
-          final scrollController = PrimaryScrollController.of(context);
-
-          if (scrollController.hasClients) {
-            scrollController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-          }
-        },
-        child: const Icon(Icons.arrow_back),
+      body: SafeArea(
+        child: VisibleDetectScrollControllerNotifier(
+          visibleDetectorKey: const ValueKey<String>('MessagePage'),
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 12) + const EdgeInsets.only(top: 20),
+            primary: true,
+            itemBuilder: (context, index) {
+              return _buildMessageItem(context, index);
+            },
+            separatorBuilder: (context, index) {
+              return const SizedBox(height: 12);
+            },
+            itemCount: 100,
+          ),
+        ),
       ),
-      body: VisibleDetectScrollControllerNotifier(
-        visibleDetectorKey: const ValueKey<String>('MessagePage'),
-        child: ListView.builder(
-          primary: true,
-          itemBuilder: (context, index) {
-            return Text('Message Page $index');
-          },
-          itemCount: 100,
+    );
+  }
+
+  Widget _buildMessageItem(BuildContext context, int index) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.red.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Center(
+        child: Text(
+          'Message Page $index',
+          style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w600),
         ),
       ),
     );

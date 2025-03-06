@@ -4,19 +4,19 @@ import 'package:go_router/go_router.dart';
 import 'package:primary_scroll_controller_test/core/visible_detect_scroll_controller_notifier.dart';
 import 'package:primary_scroll_controller_test/app/router/routes.dart';
 
-const _navBarTheme = NavigationBarThemeData(
+final _navBarTheme = NavigationBarThemeData(
   height: 57,
   backgroundColor: Colors.white,
   indicatorColor: Colors.transparent,
   surfaceTintColor: Colors.transparent,
   labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
   elevation: 1.0,
-  // labelTextStyle: WidgetStateProperty.resolveWith((states) {
-  //   if (states.contains(WidgetState.selected)) {
-  //     return $styles.text.font11.semiBold.textColor($styles.colors.brand600);
-  //   }
-  //   return $styles.text.font11.semiBold.textColor($styles.colors.gray500);
-  // }),
+  labelTextStyle: WidgetStateProperty.resolveWith((states) {
+    if (states.contains(WidgetState.selected)) {
+      return const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.black);
+    }
+    return TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey.shade500);
+  }),
 );
 
 class TestBottomNavigationBar extends StatefulWidget {
@@ -41,16 +41,12 @@ class _TestBottomNavigationBarState extends State<TestBottomNavigationBar> {
 
   // 각 브랜치의 context를 가져오는 메서드
   BuildContext? getBranchContext(int index) {
-    switch (index) {
-      case 0:
-        return homeNavigatorKey.currentContext;
-      case 1:
-        return messageNavigatorKey.currentContext;
-      case 2:
-        return menuNavigatorKey.currentContext;
-      default:
-        return null;
-    }
+    return switch (index) {
+      0 => homeNavigatorKey.currentContext,
+      1 => messageNavigatorKey.currentContext,
+      2 => menuNavigatorKey.currentContext,
+      _ => null,
+    };
   }
 
   // 현재 활성화된 브랜치의 context를 가져오는 메서드
@@ -58,18 +54,26 @@ class _TestBottomNavigationBarState extends State<TestBottomNavigationBar> {
     return getBranchContext(widget.navigationShell.currentIndex);
   }
 
+  void _addScrollListener(VoidCallback listener) {
+    _primaryScrollController?.addListener(listener);
+  }
+
+  void _removeScrollListener(VoidCallback listener) {
+    _primaryScrollController?.removeListener(listener);
+  }
+
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollControllerNotification>(
       onNotification: (notification) {
         if (_primaryScrollController != notification.controller) {
-          _primaryScrollController?.removeListener(scrollOffsetListener);
+          _removeScrollListener(scrollOffsetListener);
           setState(() {
             // 기본 스크롤 컨트롤러를 업데이트합니다.
             // 주어진 컨트롤러는 전송 측의 위젯에 따라 삭제되므로 여기서는 삭제되지 않습니다.
             _primaryScrollController = notification.controller;
           });
-          _primaryScrollController?.addListener(scrollOffsetListener);
+          _addScrollListener(scrollOffsetListener);
           scrollOffsetListener();
         }
 
@@ -98,7 +102,7 @@ class _TestBottomNavigationBarState extends State<TestBottomNavigationBar> {
                     padding: EdgeInsets.only(top: 5, bottom: 2),
                     child: NavigationDestination(
                       label: '홈',
-                      icon: Icon(Icons.home_outlined),
+                      icon: Icon(Icons.home_outlined, color: Colors.grey),
                       selectedIcon: Icon(Icons.home),
                     ),
                   ),
@@ -106,7 +110,7 @@ class _TestBottomNavigationBarState extends State<TestBottomNavigationBar> {
                     padding: EdgeInsets.only(top: 5, bottom: 2),
                     child: NavigationDestination(
                       label: '메시지',
-                      icon: Icon(Icons.message_outlined),
+                      icon: Icon(Icons.message_outlined, color: Colors.grey),
                       selectedIcon: Icon(Icons.message),
                     ),
                   ),
@@ -114,7 +118,7 @@ class _TestBottomNavigationBarState extends State<TestBottomNavigationBar> {
                     padding: EdgeInsets.only(top: 5, bottom: 2),
                     child: NavigationDestination(
                       label: '내 정보',
-                      icon: Icon(Icons.person_outline),
+                      icon: Icon(Icons.person_outline, color: Colors.grey),
                       selectedIcon: Icon(Icons.person),
                     ),
                   ),
@@ -143,22 +147,26 @@ class _TestBottomNavigationBarState extends State<TestBottomNavigationBar> {
   }
 
   void _onDestinationSelected(int index) {
+    bool isSamePage = index == widget.navigationShell.currentIndex;
+
+    // 같은 페이지일 경우에 클릭하면 최상단으로 스크롤 이동
+    if (isSamePage) {
+      final BuildContext? context = getBranchContext(index);
+      if (context == null) return;
+
+      final scrollController = PrimaryScrollController.of(context);
+
+      if (scrollController.hasClients) {
+        Future.delayed(const Duration(milliseconds: 150), () {
+          scrollController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+        });
+      }
+    }
+
     widget.navigationShell.goBranch(
       index,
       initialLocation: index == widget.navigationShell.currentIndex,
     );
-
-    final BuildContext? context = getBranchContext(index);
-
-    if (context == null) return;
-
-    final scrollController = PrimaryScrollController.of(context);
-
-    if (scrollController.hasClients) {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        scrollController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-      });
-    }
   }
 }
 

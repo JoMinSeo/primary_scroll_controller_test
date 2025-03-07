@@ -37,7 +37,11 @@ class TestBottomNavigationBar extends StatefulWidget {
 class _TestBottomNavigationBarState extends State<TestBottomNavigationBar> {
   ScrollController? _primaryScrollController;
 
+  /// 스크롤 위치가 최상단인지에 대한 플래그
   bool _isTopPosition = true;
+
+  /// 스크롤 애니메이션 진행중인지에 대한 플래그
+  bool _isAnimating = false;
 
   // 각 브랜치의 context를 가져오는 메서드
   BuildContext? getBranchContext(int index) {
@@ -175,10 +179,8 @@ class _TestBottomNavigationBarState extends State<TestBottomNavigationBar> {
       if (context == null) return;
 
       final scrollController = PrimaryScrollController.of(context);
-      if (scrollController.hasClients) {
-        Future.delayed(const Duration(milliseconds: 150), () {
-          scrollController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-        });
+      if (scrollController.hasClients && !_isAnimating) {
+        _startScrollAnimation(scrollController);
       }
     }
 
@@ -186,6 +188,13 @@ class _TestBottomNavigationBarState extends State<TestBottomNavigationBar> {
       index,
       initialLocation: index == widget.navigationShell.currentIndex,
     );
+  }
+
+  void _startScrollAnimation(ScrollController controller) {
+    _isAnimating = true;
+    controller.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut).then((_) {
+      _isAnimating = false;
+    });
   }
 }
 

@@ -49,6 +49,16 @@ class _TestBottomNavigationBarState extends State<TestBottomNavigationBar> {
     };
   }
 
+  // 기본 라우트 경로 (서브라우트가 아닌 메인 라우트)
+  String getRootRoutePath(int index) {
+    return switch (index) {
+      0 => HomeRoute.path,
+      1 => MessageRoute.path,
+      2 => MenuRoute.path,
+      _ => '',
+    };
+  }
+
   // 현재 활성화된 브랜치의 context를 가져오는 메서드
   BuildContext? getCurrentBranchContext() {
     return getBranchContext(widget.navigationShell.currentIndex);
@@ -147,15 +157,24 @@ class _TestBottomNavigationBarState extends State<TestBottomNavigationBar> {
   }
 
   void _onDestinationSelected(int index) {
-    bool isSamePage = index == widget.navigationShell.currentIndex;
+    // 현재 탭과 선택된 탭이 같은지 확인
+    bool isSameIndex = index == widget.navigationShell.currentIndex;
 
-    // 같은 페이지일 경우에 클릭하면 최상단으로 스크롤 이동
-    if (isSamePage) {
+    // 현재 라우트 정보 가져오기
+    final GoRouterState routerState = GoRouterState.of(context);
+    final String currentLocation = routerState.uri.path;
+
+    // 기본 라우트 경로 (서브라우트가 아닌 메인 라우트)
+    final String rootRoutePath = getRootRoutePath(index);
+
+    bool isSameRoute = currentLocation == rootRoutePath;
+
+    // 같은 탭이지만 정확히 같은 라우트인지 확인
+    if (isSameIndex && isSameRoute) {
       final BuildContext? context = getBranchContext(index);
       if (context == null) return;
 
       final scrollController = PrimaryScrollController.of(context);
-
       if (scrollController.hasClients) {
         Future.delayed(const Duration(milliseconds: 150), () {
           scrollController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);

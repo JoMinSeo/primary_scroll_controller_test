@@ -145,6 +145,11 @@ class _TestBottomNavigationBarState extends State<TestBottomNavigationBar> {
     );
   }
 
+  /// 스크롤 위치를 감지하여 상단 위치 여부를 업데이트하는 리스너입니다.
+  ///
+  /// [_primaryScrollController]가 유효하지 않은 경우 상단 위치로 간주합니다.
+  /// 스크롤 offset이 50.0 미만인 경우를 상단 위치로 판단하며,
+  /// 이전 상태와 다른 경우에만 [_isTopPosition] 상태를 업데이트합니다.
   void scrollOffsetListener() {
     final hasValidController = _primaryScrollController?.hasClients ?? false;
     if (!hasValidController) {

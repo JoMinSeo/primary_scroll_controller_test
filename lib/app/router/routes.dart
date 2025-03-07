@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:primary_scroll_controller_test/app/router/bottom_navigation_bar.dart';
+import 'package:primary_scroll_controller_test/pages/home_detail_page.dart';
 import 'package:primary_scroll_controller_test/pages/home_page.dart';
 import 'package:primary_scroll_controller_test/pages/menu_page.dart';
 import 'package:primary_scroll_controller_test/pages/message_page.dart';
@@ -15,7 +16,9 @@ final GlobalKey<NavigatorState> menuNavigatorKey = GlobalKey<NavigatorState>(deb
   branches: <TypedStatefulShellBranch<StatefulShellBranchData>>[
     TypedStatefulShellBranch<HomeBranchData>(
       routes: <TypedRoute<RouteData>>[
-        TypedGoRoute<HomeRoute>(path: HomeRoute.path, name: HomeRoute.name),
+        TypedGoRoute<HomeRoute>(path: HomeRoute.path, name: HomeRoute.name, routes: [
+          TypedGoRoute<HomeDetailRoute>(path: HomeDetailRoute.path, name: HomeDetailRoute.name),
+        ]),
       ],
     ),
     TypedStatefulShellBranch<MessageBranchData>(
@@ -119,5 +122,20 @@ class MenuRoute extends GoRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const MenuPage();
+  }
+}
+
+class HomeDetailRoute extends GoRouteData {
+  const HomeDetailRoute();
+
+  static const path = 'home_detail';
+
+  static const String name = 'home_detail_view';
+
+  static final GlobalKey<NavigatorState> $parentNavigatorKey = homeNavigatorKey;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const HomeDetailPage();
   }
 }
